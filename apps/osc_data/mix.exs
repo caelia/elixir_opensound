@@ -1,12 +1,12 @@
-defmodule OSC.Message.Mixfile do
+defmodule OSC.Data.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :osc_message,
+    [app: :osc_data,
      version: "0.0.1",
      deps_path: "../../deps",
      lockfile: "../../mix.lock",
-     elixir: "~> 0.15.0",
+     elixir: "~> 0.14.3",
      deps: deps]
   end
 
@@ -14,7 +14,7 @@ defmodule OSC.Message.Mixfile do
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:logger]]
+    [applications: []]
   end
 
   # Dependencies can be hex.pm packages:

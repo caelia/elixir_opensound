@@ -1,4 +1,4 @@
-defmodule OSC.MessageTest do
+defmodule OSC.DataTest do
   use ExUnit.Case
 
   test "the truth" do
