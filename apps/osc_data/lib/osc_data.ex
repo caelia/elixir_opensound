@@ -88,7 +88,72 @@ defmodule OSC.Data do
     Encoding.encode x
   end
 
-  def decode(binary) do
+  defp decode_string(bin) do
+    decode_string("", bin)
+  end
+  defp decode_string(result, <<0, tail::binary>>) do
+    mod = rem byte_size(result), 4
+    case {mod, tail} do
+      {0, <<0, 0, 0, rest::binary>>} -> {result, rest}
+      {1, <<0, 0, rest::binary>>} -> {result, rest}
+      {2, <<0, rest::binary>>} -> {result, rest}
+      {3, <<rest::binary>>} -> {result, rest}
+    end
+  end
+  defp decode_string(result, <<s, rest::binary>>) do
+    decode_string result <> <<s>>, rest
+  end
+
+  defp decode_int(<<x::signed-32, rest::binary>>) do
+    {x, rest}
+  end
+
+  defp decode_float(<<x::float-32, rest::binary>>) do
+    {x, rest}
+  end
+
+  defp decode_blob(0, data) do
+    {<<>>, data}
+  end
+  defp decode_blob(bytes, <<x, tail::binary>>) do
+    {new_tail, rest} = decode_blob bytes-1, tail
+    {<<x>> <> new_tail, rest}
+  end
+  defp decode_blob(data) do
+    <<size::32, tail>> = data
+    {body, rest} = decode_blob size, tail
+    {%Blob{data: body}, rest}
+  end
+
+  def decode_message_args("", _) do
+    []
+  end
+  def decode_message_args(<<first, rest::binary>>, data) do
+    {arg, tail} = case first do
+      ?s -> decode_string data
+      ?i -> decode_int data
+      ?f -> decode_float data
+      ?b -> decode_blob data
+    end
+    [arg | decode_message_args rest, tail]
+  end
+
+  def decode_message(address, rest) do
+    {<<",", tags::binary>>, arg_data} = decode_string rest
+    args = decode_message_args(tags, arg_data) 
+    %Message{address: address, args: args}
+  end
+
+  def decode_bundle(content) do
     :not_implemented
+  end
+
+  def decode(binary) do
+    {leader, rest} = decode_string(binary)
+    case leader do
+      "#bundle" -> decode_bundle rest
+      <<47, _::binary>> -> decode_message leader, rest
+      _ -> {:error, "unknown data type"}
+    end
   end
 end
