@@ -8,7 +8,6 @@ defmodule OSC.DataTest do
   end
 
   defp create_message1 do
-    #{:message, "/oscillator/4/frequency", [440.0]}
     %OSC.Data.Message{address: "/oscillator/4/frequency", args: [440.0]}
   end
   defp message1_bin do
@@ -16,7 +15,6 @@ defmodule OSC.DataTest do
   end
 
   defp create_message2 do
-    # {:message, "/foo", [1000, -1, "hello", 1.234, 5.678]}
     %OSC.Data.Message{address: "/foo", args: [1000, -1, "hello", 1.234, 5.678]}
   end
   defp message2_bin do
