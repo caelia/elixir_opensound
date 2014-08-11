@@ -59,27 +59,6 @@ defmodule OSC.Data do
   end
 
   defimpl Encoding, for: Float do
-    defp pos_exp(n, ex) do
-      cond do
-        n == 2 -> ex + 1
-        n < 2 -> ex
-        true -> pos_exp(n/2, ex+1)
-      end
-    end
-    defp pos_exp(n) do
-      pos_exp n, 0
-    end
-    defp neg_exp(n, ex) do
-      if n >= 1 do
-        ex
-      else
-        neg_exp(n*2, ex-1)
-      end
-    end
-    defp neg_exp(n) do
-      neg_exp n, 0
-    end
-
     # Not completely sure about these limits. This is based on 
     # 2 * :math.pow(2, 127), but with the last digit of the significand
     # reduced by 1, because the significand of an IEEE 754 float must be
@@ -87,27 +66,6 @@ defmodule OSC.Data do
     def encode(n) when abs(n) > 3.402823669209384e38 do
       {:error, "Number out of range."}
     end
-    def encode(n) when n == 0 do
-      {"f", <<0 :: 32>>}
-    end
-#     def encode(n) do
-#       sign_bit = if n < 0, do: 1, else: 0
-#       raw_number = abs n
-#       raw_exponent = cond do
-#         raw_number == 1 -> 0
-#         raw_number > 1 -> pos_exp(raw_number)
-#         true-> neg_exp(raw_number)
-#       end
-#       exponent = raw_exponent + 128
-#       raw_significand = (raw_number / (:math.pow(2, raw_exponent)) - 1) * 10000000
-#       significand = round (
-#         if raw_significand > 8388607 do
-#           raw_significand / 10
-#         else
-#           raw_significand
-#         end )
-#         {"f", <<sign_bit :: 1, exponent :: 8, significand :: 23>>}
-#     end
     def encode(n) do
       {"f", <<n :: float-32>>}
     end
